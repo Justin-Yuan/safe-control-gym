@@ -65,6 +65,7 @@ class Experiment:
         sim_steps = log_freq // env.CTRL_FREQ if log_freq else 1 
         n_step, n_traj = 0, 0
         done = False
+        ctrl_data = defaultdict(list)
         if env.INFO_IN_RESET:
             obs, info = env.reset()
         else:
@@ -72,12 +73,14 @@ class Experiment:
             info = None
         # cache anything the ctrl needs for running an episode later
         ctrl.reset_before_run(obs, info, env=env)
+        for data_key, data_val in ctrl.get_eval_result_dict():
+            ctrl_data[data_key].append(data_val)
             
         # collect data 
         while True:
             # everything other than `obs` that the ctrl needs should be in info, 
             # or otherwise should be kept as ctrl attributes 
-            act = ctrl.get_action(obs, info)
+            act = ctrl.select_action(obs, info)
             # inner sim loop to accomodate different control frequencies
             for _ in range(sim_steps):
                 obs, rew, done, info = env.step(act)
@@ -95,7 +98,11 @@ class Experiment:
                 # terminate when data is enough
             if (n_trajs and n_traj >= n_trajs) or (n_steps and n_step >= n_steps):
                 break
-        return env.data
+        
+        # compile collected data 
+        results = env.data 
+        results.update(ctrl.get_eval_result_dict())
+        return results
     
     def compute_metrics(self, trajs_data, **kwargs):
         """"""
