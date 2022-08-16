@@ -1,4 +1,16 @@
 """Deep Deterministic Policy Gradient
+
+Reference paper & code:
+    * [Continuous Control with Deep Reinforcement Learning](https://arxiv.org/pdf/1509.02971.pdf)
+    * [openai spinning up - ddpg](https://github.com/openai/spinningup/tree/master/spinup/algos/pytorch/ddpg)
+    * [DeepRL - ddpg](https://github.com/ShangtongZhang/DeepRL/blob/master/deep_rl/agent/DDPG_agent.py)
+
+Example:
+    $ python experiments/main.py --algo ddpg --task cartpole --output_dir results --tag test/cartpole_ddpg --seed 6 
+    
+Todo
+    *
+
 """
 import os
 import time
@@ -196,7 +208,7 @@ class DDPG(BaseController):
         else:
             if not is_wrapped(env, RecordEpisodeStatistics):
                 env = RecordEpisodeStatistics(env, n_episodes)
-                # Add eposodic stats to be tracked.
+                # Add episodic stats to be tracked.
                 env.add_tracker("constraint_violation", 0, mode="queue")
                 env.add_tracker("constraint_values", 0, mode="queue")
                 env.add_tracker("mse", 0, mode="queue")
